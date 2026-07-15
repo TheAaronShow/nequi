@@ -1,0 +1,31 @@
+{
+  "RequestMessage": {
+    "RequestHeader": {
+      "Channel": "GLK06-C001",
+      "RequestDate": "2021-02-15T20:26:12.654Z",
+      "MessageID": "1234567891234598",
+      "ClientID": "ABC12345",
+      "Destination": {
+        "ServiceName": "DispersionService",
+        "ServiceOperation": "disperseFunds",
+        "ServiceRegion": "C001",
+        "ServiceVersion": "1.0.0"
+      }
+    },
+    "RequestBody": {
+      "any": {
+        "disperseFundsRQ": {
+          "code": "NIT_440627004_00",
+          "trackingID": "DAN123456789",
+          "phoneNumber": "3998764643",
+          "documentType": "CC",
+          "documentNumber": "12345687",
+          "value": "150000",
+          "reference1": "ref1",
+          "reference2": "ref2",
+          "reference3": "ref3"
+        }
+      }
+    }
+  }
+}
