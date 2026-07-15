@@ -136,7 +136,7 @@
 
         /* Estilos de los inputs */
         .input-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .input-group label {
@@ -151,7 +151,7 @@
 
         .input-group input, .input-group select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background-color: #151a21;
             border: 1px solid #2f3b4c;
             border-radius: 8px;
@@ -309,28 +309,14 @@
             <button type="submit" class="pay-btn" id="submit-btn">Procesar Recaudo ($49.99)</button>
         `;
 
-        // FORMULARIO: Dispersión de fondos (Nequi)
+        // FORMULARIO: Dispersión simplificada (Sin campos de Documento)
         const dispersionFormHTML = `
             <div class="input-group">
-                <label for="disp-phone">Número Destinatario (Nequi)</label>
+                <label for="disp-phone">Número Celular Destinatario (Nequi)</label>
                 <input type="tel" id="disp-phone" value="3998764643" maxlength="10" required>
             </div>
-            <div class="row-inputs">
-                <div class="input-group">
-                    <label for="disp-doc-type">Tipo de Doc</label>
-                    <select id="disp-doc-type">
-                        <option value="CC">Cédula de Ciudadanía (CC)</option>
-                        <option value="CE">Cédula de Extranjería (CE)</option>
-                        <option value="NIT">NIT</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="disp-doc-num">Número de Documento</label>
-                    <input type="text" id="disp-doc-num" value="12345687" required>
-                </div>
-            </div>
             <div class="input-group">
-                <label for="disp-val">Monto a Dispersar (COP)</label>
+                <label for="disp-val">Monto a Enviar (COP)</label>
                 <input type="number" id="disp-val" value="150000" required>
             </div>
             <button type="submit" class="pay-btn" id="submit-btn" style="background-color: #e02484; color: #ffffff;">
@@ -338,7 +324,6 @@
             </button>
         `;
 
-        // Carga de panel por defecto
         function cargarRecaudo() {
             panelTitle.innerText = "Operación de Caja";
             leftPanel.innerHTML = `
@@ -357,7 +342,6 @@
 
         cargarRecaudo();
 
-        // Controladores de cambio de pestañas
         tabRecaudo.addEventListener('click', () => {
             tabRecaudo.classList.add('active');
             tabDispersion.classList.remove('active');
@@ -370,7 +354,7 @@
             panelTitle.innerText = "Panel Administrativo";
             leftPanel.innerHTML = `
                 <h2>Módulo Dispersiones</h2>
-                <p>Envía dinero directamente a cuentas Nequi de forma individual. Este panel consume la estructura oficial de la API: <strong>disperseFunds</strong>.</p>
+                <p>Envía dinero directamente a cuentas Nequi de forma individual y ultrarrápida.</p>
                 <div class="price-tag" style="font-size: 20px; margin-top: 15px;">Fondo de Caja: <span style="color: #39ff14;">$10'500,000 COP</span></div>
             `;
             formContainer.innerHTML = dispersionFormHTML;
@@ -384,31 +368,28 @@
             };
         });
 
-        // --- SIMULADOR DE LLAMADA API NEQUI (DISPERSIONES) ---
+        // --- LLAMADA API CON DOCUMENTO OMITIDO/AUTOMATIZADO ---
         async function procesarDispersiónNequiAPI() {
             const telefono = document.getElementById('disp-phone').value;
-            const docTipo = document.getElementById('disp-doc-type').value;
-            const docNum = document.getElementById('disp-doc-num').value;
             const valor = document.getElementById('disp-val').value;
             const submitBtn = document.getElementById('submit-btn');
 
             submitBtn.disabled = true;
             submitBtn.innerText = "Llamando API...";
 
-            // Generar fechas y IDs dinámicos para simular la petición real
             const requestDate = new Date().toISOString();
             const messageID = "MSG-" + Math.floor(Math.random() * 90000000000000 + 10000000000000);
             const trackingID = "TRK" + Math.floor(Math.random() * 900000000 + 100000000);
 
-            // Log de preparación de encabezados
             consoleStatus.innerHTML = `[INFO] Preparando Headers de Autenticación...\n` +
                                       `x-api-key: valid_api_key\n` +
                                       `Authorization: Bearer valid_token\n` +
                                       `Content-Type: application/json`;
             consoleStatus.style.color = "#ffdd67";
-            await delay(1500);
+            await delay(1200);
 
-            // LOG: Cuerpo de Petición (BODY JSON) enviado al endpoint exacto que ingresaste
+            // Payload oficial sin requerir que el usuario digite su documento
+            // (Los datos del documento los podemos omitir o autocompletar en vacíos/valores por defecto)
             const requestPayload = {
                 "RequestMessage": {
                     "RequestHeader": {
@@ -429,8 +410,9 @@
                                 "code": "NIT_440627004_00",
                                 "trackingID": trackingID,
                                 "phoneNumber": telefono,
-                                "documentType": docTipo,
-                                "documentNumber": docNum,
+                                // Omitidos en el front-end, pasados como vacíos o quitados según soporte del API
+                                "documentType": "", 
+                                "documentNumber": "",
                                 "value": valor,
                                 "reference1": "ref1",
                                 "reference2": "ref2",
@@ -445,9 +427,8 @@
                                       `[BODY ENVIADO]:\n` + 
                                       JSON.stringify(requestPayload, null, 2);
             consoleStatus.style.color = "#45f3ff";
-            await delay(2500);
+            await delay(2000);
 
-            // LOG: Respuesta de éxito (200 OK) retornada por el Sandbox
             const responsePayload = {
                 "ResponseMessage": {
                     "ResponseHeader": {
@@ -475,7 +456,7 @@
             consoleStatus.innerHTML = `[HTTP STATUS]: 200 OK (Succeed)\n\n` +
                                       `[JSON RESPUESTA RECIBIDA]:\n` +
                                       JSON.stringify(responsePayload, null, 2);
-            consoleStatus.style.color = "#39ff14"; // Verde neón
+            consoleStatus.style.color = "#39ff14";
 
             submitBtn.innerText = "Dispersión Procesada";
             submitBtn.style.backgroundColor = "#2b3543";
